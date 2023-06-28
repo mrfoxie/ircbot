@@ -1,29 +1,14 @@
 name: Python Workflow
-
 on:
   push:
     branches:
       - master  # Or specify the branch you want to trigger the workflow on
-  workflow_run:
-    workflows: ["Python Workflow"]
-    types:
-      - completed
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Stop old workflow
-      if: github.event_name == 'push'
-      run: |
-        echo "Stopping previous workflow..."
-        curl \
-          -X POST \
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/cancel"
-
     - name: Checkout code
       uses: actions/checkout@v2
 
