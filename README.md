@@ -63,4 +63,3 @@ Contributions are welcome! If you would like to contribute to this project, plea
 
 This project is licensed under the [MIT License](LICENSE).
 
-You can copy the above Markdown content and save it as `README.md` in the root directory of your "mrfoxie/ircbot" repository. Feel free to customize it further based on your specific needs and provide additional information about your project if desired.
