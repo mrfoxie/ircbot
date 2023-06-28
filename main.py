@@ -18,7 +18,7 @@ send_irc_message("NICK " + bot_name)
 send_irc_message("USER " + bot_name + " 0 * :" + bot_name)
 send_irc_message("JOIN " + channel)
 
-# Global variables for tracking bot status
+# Global variables for tracking bot status and moderation
 start_time = datetime.datetime.now()
 connected_users = set()
 
@@ -28,7 +28,7 @@ def handle_greet(user):
     return response
 
 def handle_help():
-    response = "I'm here to help! Available commands: !greet, !help, !status"
+    response = "I'm here to help! Available commands: !greet, !help, !status, !kick, !ban, !clear"
     return response
 
 def handle_status():
@@ -36,6 +36,32 @@ def handle_status():
     formatted_uptime = str(uptime).split('.')[0]  # Format uptime as HH:MM:SS
     num_users = len(connected_users)
     response = f"Bot Uptime: {formatted_uptime} | Connected Users: {num_users}"
+    return response
+
+def handle_kick(user, target, is_op):
+    if is_op:
+        send_irc_message("KICK " + channel + " " + target)
+        response = f"{target} has been kicked from the channel."
+    else:
+        response = "You don't have permission to use this command."
+    return response
+
+def handle_ban(user, target, is_op):
+    if is_op:
+        send_irc_message("MODE " + channel + " +b " + target)
+        send_irc_message("KICK " + channel + " " + target)
+        response = f"{target} has been banned from the channel."
+    else:
+        response = "You don't have permission to use this command."
+    return response
+
+def handle_clear(user, is_op):
+    if is_op:
+        # Clear chat history by sending a message with null content
+        send_irc_message("PRIVMSG " + channel + " :\x01ACTION clears the chat history\x01")
+        response = "Chat history has been cleared."
+    else:
+        response = "You don't have permission to use this command."
     return response
 
 # Main loop to receive and process messages
@@ -52,6 +78,10 @@ while True:
         # Check if message is a command
         if message.startswith("!"):
             command = message.split()[0][1:].lower()
+            args = message.split()[1:]
+            
+            # Check if the user is an op
+            is_op = "@" in data
             
             # Process command
             if command == "greet":
@@ -60,6 +90,20 @@ while True:
                 response = handle_help()
             elif command == "status":
                 response = handle_status()
+            elif command == "kick":
+                if len(args) >= 1:
+                    target = args[0]
+                    response = handle_kick(user, target, is_op)
+                else:
+                    response = "Please specify a user to kick."
+            elif command == "ban":
+                if len(args) >= 1:
+                    target = args[0]
+                    response = handle_ban(user, target, is_op)
+                else:
+                    response = "Please specify a user to ban."
+            elif command == "clear":
+                response = handle_clear(user, is_op)
             # Add more command handlers here as needed
             
             # Send the response back to the channel
