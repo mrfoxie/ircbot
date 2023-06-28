@@ -1,5 +1,7 @@
 import socket
 import datetime
+import re
+
 # IRC server information
 server = "irc.libera.chat"
 port = 6667
@@ -64,6 +66,13 @@ def handle_clear(user, is_op):
         response = "You don't have permission to use this command."
     return response
 
+# Message filtering
+prohibited_words = ["anal", "anus", "arse", "ass", "ballsack", "balls", "bastard", "bitch", "biatch", "bloody", "blowjob", "blow job", "bollock", "bollok", "boner", "boob", "bugger", "bum", "butt", "buttplug", "clitoris", "cock", "coon", "crap", "cunt", "damn", "dick", "dildo", "dyke", "fag", "feck", "fellate", "fellatio", "felching", "fuck", "f u c k", "fudgepacker", "fudge packer", "flange", "Goddamn", "God damn", "hell", "homo", "jerk", "jizz", "knobend", "knob end", "labia", "lmao", "lmfao", "muff", "nigger", "nigga", "omg", "penis", "piss", "poop", "prick", "pube", "pussy", "queer", "scrotum", "sex", "shit", "s hit", "sh1t", "slut", "smegma", "spunk", "tit", "tosser", "turd", "twat", "vagina", "wank", "whore", "wtf"]
+prohibited_pattern = re.compile(r"\b(" + "|".join(prohibited_words) + r")\b", re.IGNORECASE)
+
+def is_message_prohibited(message):
+    return bool(prohibited_pattern.search(message))
+
 # Main loop to receive and process messages
 while True:
     data = irc.recv(2048).decode("utf-8")
@@ -75,36 +84,41 @@ while True:
         connected_users.add(user)  # Add user to the set of connected users
         message = ":".join(data.split(':')[2:])
         
-        # Check if message is a command
-        if message.startswith("!"):
-            command = message.split()[0][1:].lower()
-            args = message.split()[1:]
-            
-            # Check if the user is an op
-            is_op = "@" in data
-            
-            # Process command
-            if command == "greet":
-                response = handle_greet(user)
-            elif command == "help":
-                response = handle_help()
-            elif command == "status":
-                response = handle_status()
-            elif command == "kick":
-                if len(args) >= 1:
-                    target = args[0]
-                    response = handle_kick(user, target, is_op)
-                else:
-                    response = "Please specify a user to kick."
-            elif command == "ban":
-                if len(args) >= 1:
-                    target = args[0]
-                    response = handle_ban(user, target, is_op)
-                else:
-                    response = "Please specify a user to ban."
-            elif command == "clear":
-                response = handle_clear(user, is_op)
-            # Add more command handlers here as needed
-            
-            # Send the response back to the channel
-            send_irc_message("PRIVMSG " + channel + " :" + response)
+        # Check if the message contains any prohibited words
+        if is_message_prohibited(message):
+            # Perform action for flagged messages (e.g., warn, mute, or take appropriate action)
+            response = f"Warning: Your message contains prohibited content."
+        else:
+            # Check if message is a command
+            if message.startswith("!"):
+                command = message.split()[0][1:].lower()
+                args = message.split()[1:]
+                
+                # Check if the user is an op
+                is_op = "@" in data
+                
+                # Process command
+                if command == "greet":
+                    response = handle_greet(user)
+                elif command == "help":
+                    response = handle_help()
+                elif command == "status":
+                    response = handle_status()
+                elif command == "kick":
+                    if len(args) >= 1:
+                        target = args[0]
+                        response = handle_kick(user, target, is_op)
+                    else:
+                        response = "Please specify a user to kick."
+                elif command == "ban":
+                    if len(args) >= 1:
+                        target = args[0]
+                        response = handle_ban(user, target, is_op)
+                    else:
+                        response = "Please specify a user to ban."
+                elif command == "clear":
+                    response = handle_clear(user, is_op)
+                # Add more command handlers here as needed
+                
+                # Send the response back to the channel
+                send_irc_message("PRIVMSG " + channel + " :" + response)
