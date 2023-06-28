@@ -4,7 +4,7 @@ import datetime
 server = "irc.libera.chat"
 port = 6667
 channel = "#HackerIdiot"
-bot_name = "Helper"
+bot_name = "HackerIdiot_bot"
 
 # Connect to the IRC server
 irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
