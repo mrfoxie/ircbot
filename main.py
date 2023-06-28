@@ -74,7 +74,7 @@ def handle_greet(user):
 
 def handle_help(user):
     if "help" in user.permissions:
-        response = "I'm here to help! Available commands: !greet, !help, !weather"
+        response = "I'm here to help! Available commands: !greet, !help"
     else:
         response = "You don't have permission to use this command."
     return response
