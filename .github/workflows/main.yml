@@ -1,4 +1,4 @@
-name: Python Workflow
+name: IR bot
 on:
   schedule:
     - cron: "0 * * * *"  # Run every hour, adjust the cron schedule as needed
