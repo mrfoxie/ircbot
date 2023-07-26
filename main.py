@@ -6,7 +6,7 @@ import re
 server = "irc.libera.chat"
 port = 6667
 channel = "#HackerIdiot"
-bot_name = "Admin"
+bot_name = "HackerIdiot_bot"
 
 # Connect to the IRC server
 irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
